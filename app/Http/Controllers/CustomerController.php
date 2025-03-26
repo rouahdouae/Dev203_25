@@ -16,7 +16,7 @@ class CustomerController extends Controller
     public function index(): View
     {
         return view('customers.index', [
-            'customers' => Customer::all()
+            'customers' => Customer::paginate(10)
         ]);
     }
 
@@ -85,14 +85,25 @@ class CustomerController extends Controller
     public function search(Request $request)
     {
         $term = $request->input('term');
-        
+
         $customers = Customer::where('first_name', 'like', "%{$term}%")
             ->orWhere('last_name', 'like', "%{$term}%")
             ->orWhere('email', 'like', "%{$term}%")
             ->orWhere('phone', 'like', "%{$term}%")
             ->orWhere('address', 'like', "%{$term}%")
-            ->get();
+            ->paginate(10);
 
-        return response()->json($customers);
+        return response()->json([
+            'customers' => $customers->items(),
+            'pagination' => [
+                'total' => $customers->total(),
+                'per_page' => $customers->perPage(),
+                'current_page' => $customers->currentPage(),
+                'last_page' => $customers->lastPage(),
+                'from' => $customers->firstItem(),
+                'to' => $customers->lastItem(),
+                'links' => $customers->linkCollection()->toArray()
+            ]
+        ]);
     }
 }
