@@ -75,56 +75,49 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('customerForm');
-
-        form.addEventListener('submit', function(event) {
+    $(document).ready(function() {
+        $('#customerForm').on('submit', function(event) {
             let isValid = true;
 
             // Validate First Name
-            const firstName = document.getElementById('first_name');
-            if (!firstName.value.trim()) {
-                firstName.classList.add('is-invalid');
+            if (!$('#first_name').val().trim()) {
+                $('#first_name').addClass('is-invalid');
                 isValid = false;
             } else {
-                firstName.classList.remove('is-invalid');
+                $('#first_name').removeClass('is-invalid');
             }
 
             // Validate Last Name
-            const lastName = document.getElementById('last_name');
-            if (!lastName.value.trim()) {
-                lastName.classList.add('is-invalid');
+            if (!$('#last_name').val().trim()) {
+                $('#last_name').addClass('is-invalid');
                 isValid = false;
             } else {
-                lastName.classList.remove('is-invalid');
+                $('#last_name').removeClass('is-invalid');
             }
 
             // Validate Email
-            const email = document.getElementById('email');
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email.value.trim() || !emailRegex.test(email.value.trim())) {
-                email.classList.add('is-invalid');
+            if (!$('#email').val().trim() || !emailRegex.test($('#email').val().trim())) {
+                $('#email').addClass('is-invalid');
                 isValid = false;
             } else {
-                email.classList.remove('is-invalid');
+                $('#email').removeClass('is-invalid');
             }
 
             // Validate Phone
-            const phone = document.getElementById('phone');
-            if (!phone.value.trim()) {
-                phone.classList.add('is-invalid');
+            if (!$('#phone').val().trim()) {
+                $('#phone').addClass('is-invalid');
                 isValid = false;
             } else {
-                phone.classList.remove('is-invalid');
+                $('#phone').removeClass('is-invalid');
             }
 
             // Validate Address
-            const address = document.getElementById('address');
-            if (!address.value.trim()) {
-                address.classList.add('is-invalid');
+            if (!$('#address').val().trim()) {
+                $('#address').addClass('is-invalid');
                 isValid = false;
             } else {
-                address.classList.remove('is-invalid');
+                $('#address').removeClass('is-invalid');
             }
 
             if (!isValid) {
