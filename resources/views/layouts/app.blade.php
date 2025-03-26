@@ -11,16 +11,16 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- jQuery UI CSS -->
     <link href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" rel="stylesheet">
-    @vite(['resources/js/app.js'])
+    @vite(['resources/js/app.js', 'resources/css/app.css'])
 </head>
 
 <body class="min-vh-100 d-flex flex-column">
     <header class="bg-dark text-white shadow-sm">
         <nav class="container d-flex justify-content-between align-items-center py-3">
             <h1 class="h3 mb-0 fw-bold">Stock Management System</h1>
-            @auth
+
                 <a href="{{ route('dashboard') }}" class="btn btn-outline-light">Dashboard</a>
-            @endauth
+
         </nav>
     </header>
 
@@ -34,7 +34,7 @@
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     @stack('scripts')
 
     <footer class="bg-dark text-white text-center py-3">

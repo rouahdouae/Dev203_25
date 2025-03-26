@@ -2,7 +2,18 @@
 
 @section('content')
 <div class="container">
-    <h2>Customer Orders</h2>
+    <div class="row mb-4">
+        <div class="col d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Customer Orders</h2>
+            <a href="{{ route('dashboard') }}" class="btn btn-secondary d-flex align-items-center gap-2">
+                <svg class="bi" width="16" height="16" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z" />
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
 
     <div class="row mb-4" id="customerSearchContainer">
         <div class="col-md-6">
@@ -42,14 +53,36 @@
         });
     }
 
+    function displayCustomers(customers) {
+        let html = '<div class="d-flex justify-content-between align-items-center mb-3">';
+        html += '<h3>Customers Found</h3>';
+        html += '<button class="btn btn-outline-secondary btn-sm" onclick="toggleCustomerList()">';
+        html += '<i class="bi bi-list"></i> Toggle Customer List</button>';
+        html += '</div>';
+        html += '<div class="collapse show" id="customerListCollapse"><div class="list-group">';
+        customers.forEach(customer => {
+            html += `
+                <a href="#" class="list-group-item list-group-item-action" onclick="loadCustomerOrders(${customer.id})">
+                    ${customer.first_name} ${customer.last_name}
+                </a>
+            `;
+        });
+        html += '</div></div>';
+        $('#lstCustomers').html(html);
+    }
+
+    function toggleCustomerList() {
+        $('#customerListCollapse').collapse('toggle');
+    }
+
     function loadCustomerOrders(customerId) {
         // Clear previous order details
         $('#orderDetails').empty();
+        $('#lstOrders').empty();
 
         $.get(`/api/customers/${customerId}/orders`, function(orders) {
-            let html = '<div class="d-flex justify-content-between align-items-center mb-3">';
+            let html = '<div class="mb-3">';
             html += '<h3>Customer Orders</h3>';
-            html += '<button class="btn btn-secondary btn-sm" onclick="toggleCustomerSearch()">Show Customer Search</button>';
             html += '</div><div class="list-group">';
             orders.forEach(order => {
                 html += `
@@ -61,34 +94,17 @@
             html += '</div>';
             $('#lstOrders').html(html);
 
-            // Hide customer search section after selecting a customer
-            $('#customerSearchContainer').hide();
+            // Automatically collapse the customer list after selection
+            $('#customerListCollapse').collapse('hide');
         });
-    }
-
-    function displayCustomers(customers) {
-        let html = '<h3>Customers Found</h3><div class="list-group">';
-        customers.forEach(customer => {
-            html += `
-                <a href="#" class="list-group-item list-group-item-action" onclick="loadCustomerOrders(${customer.id})">
-                    ${customer.first_name} ${customer.last_name}
-                </a>
-            `;
-        });
-        html += '</div>';
-        $('#lstCustomers').html(html);
-    }
-
-    function toggleCustomerSearch() {
-        $('#customerSearchContainer').toggle();
-        $('#customer-search').val('');
-        $('#lstCustomers').empty();
     }
 
     $(document).ready(function() {
         $('#customer-search-form').on('submit', function(e) {
             e.preventDefault();
             const searchTerm = $('#customer-search').val();
+            $('#lstOrders').empty();
+            $('#orderDetails').empty();
 
             $.get(`/api/customers/search/${searchTerm}`, function(customers) {
                 displayCustomers(customers);

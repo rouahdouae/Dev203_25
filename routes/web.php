@@ -13,6 +13,14 @@ Route::get('/products', [DashboardController::class, 'products'])->name('product
 Route::get('/products-by-category', [CategoryController::class, 'productsByCategory'])->name('products.by.category');
 Route::get('/products-by-category/{category}', [CategoryController::class, 'getProductsByCategory'])->name('products.filter.by.category');
 
+// Products by Supplier routes
+Route::get('/products-by-supplier', [DashboardController::class, 'productsBySupplier'])->name('products.by.supplier');
+Route::get('/api/products-by-supplier/{supplier}', [DashboardController::class, 'getProductsBySupplier'])->name('api.products.by.supplier');
+
+// Products by Store routes
+Route::get('/products-by-store', [DashboardController::class, 'productsByStore'])->name('products.by.store');
+Route::get('/api/products-by-store/{store}', [DashboardController::class, 'getProductsByStore'])->name('api.products.by.store');
+
 // Order routes
 Route::get('/orders', [DashboardController::class, 'orders'])->name('orders.index');
 

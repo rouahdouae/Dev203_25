@@ -34,8 +34,8 @@
                             <td>{{ $product->category->name }}</td>
                             <td>{{ $product->description }}</td>
                             <td>${{ number_format($product->price, 2) }}</td>
-                            <td>{{ $product->stock->quantity ?? 0 }}</td>
-                            <td>{{ $product->supplier->name }}</td>
+                            <td>{{ $product->stock->quantity_stock ?? 0 }}</td>
+                            <td>{{ $product->supplier->first_name }} {{ $product->supplier->last_name }}</td>
                         </tr>
                         @endforeach
                     </tbody>
