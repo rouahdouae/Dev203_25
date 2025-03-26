@@ -80,12 +80,17 @@ class CustomerController extends Controller
     }
 
     /**
-     * Search for customers by name.
+     * Search for customers by name, email, phone or address.
      */
-    public function search($term)
+    public function search(Request $request)
     {
+        $term = $request->input('term');
+        
         $customers = Customer::where('first_name', 'like', "%{$term}%")
             ->orWhere('last_name', 'like', "%{$term}%")
+            ->orWhere('email', 'like', "%{$term}%")
+            ->orWhere('phone', 'like', "%{$term}%")
+            ->orWhere('address', 'like', "%{$term}%")
             ->get();
 
         return response()->json($customers);
