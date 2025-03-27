@@ -1,15 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\OrderController;
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/customers', [DashboardController::class, 'customers'])->name('customers.index');
 Route::get('/suppliers', [DashboardController::class, 'suppliers'])->name('suppliers.index');
-Route::get('/products', [DashboardController::class, 'products'])->name('products.index');
+// Product routes
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+Route::get('/api/products/{product}', [ProductController::class, 'show'])->name('api.products.show');
+Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 Route::get('/products-by-category', [CategoryController::class, 'productsByCategory'])->name('products.by.category');
 Route::get('/products-by-category/{category}', [CategoryController::class, 'getProductsByCategory'])->name('products.filter.by.category');
 
