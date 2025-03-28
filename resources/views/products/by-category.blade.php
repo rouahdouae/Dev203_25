@@ -46,7 +46,7 @@
                                 <td>{{ $product->name }}</td>
                                 <td>{{ $product->description }}</td>
                                 <td>{{ $product->price }}</td>
-                                <td>{{ $product->stock->quantity_stock }}</td>
+                                <td>{{ $product->stock ?   $product->stock->quantity_stock:0}}</td>
                                 <td>{{ $product->supplier->first_name }} {{ $product->supplier->last_name }}</td>
                             </tr>
                         @empty

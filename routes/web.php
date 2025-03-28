@@ -41,6 +41,8 @@ Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->
 
 // Customer search API route
 Route::get('/api/customers/search', [CustomerController::class, 'search'])->name('customers.search');
+// Customer search API route
+Route::get('/api/customers/search/{term}', [CustomerController::class, 'searchTerm'])->name('customers.search.term');
 
 // Customer orders API route
 Route::get('/api/customers/{customer}/orders', [OrderController::class, 'getCustomerOrders'])->name('customers.orders');

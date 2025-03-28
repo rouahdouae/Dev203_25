@@ -51,7 +51,6 @@ class DashboardController extends Controller
         $products = Product::with(['stock','category'])
         ->where('supplier_id', $supplier->id)
         ->get();
-
         return view('products._products_by_supplier', compact('products'));
     }
 
@@ -70,5 +69,10 @@ class DashboardController extends Controller
             ->get();
 
         return response()->json($products);
+    }
+
+    public function orders()
+    {
+        return view("orders.index");
     }
 }

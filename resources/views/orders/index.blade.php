@@ -79,8 +79,8 @@
         // Clear previous order details
         $('#orderDetails').empty();
         $('#lstOrders').empty();
-
         $.get(`/api/customers/${customerId}/orders`, function(orders) {
+
             let html = '<div class="mb-3">';
             html += '<h3>Customer Orders</h3>';
             html += '</div><div class="list-group">';
@@ -107,7 +107,8 @@
             $('#orderDetails').empty();
 
             $.get(`/api/customers/search/${searchTerm}`, function(customers) {
-                displayCustomers(customers);
+
+                displayCustomers(customers.customers);
             });
         });
     });

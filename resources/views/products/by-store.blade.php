@@ -81,6 +81,10 @@
                     loadingElement.classList.add('d-none');
                 });
         }
+        else
+        {
+            productsContainer.innerHTML = 'there is no products for this store';
+        }
     });
 </script>
 @endpush

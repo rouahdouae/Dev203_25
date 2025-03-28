@@ -10,7 +10,8 @@ class OrderController extends Controller
 {
     public function getCustomerOrders(Customer $customer)
     {
-        $orders = $customer->orders()->with('products')->get();
+
+        $orders = $customer->orders()->get();
         return response()->json($orders);
     }
 
