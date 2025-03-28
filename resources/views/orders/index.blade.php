@@ -48,9 +48,10 @@
 @push('scripts')
 <script>
     function loadOrderDetails(orderId) {
-        $.get(`/api/orders/${orderId}/details`, function(response) {
-            $('#orderDetails').html(response);
-        });
+        axios.get(`/api/orders/${orderId}/details`)
+            .then(response => {
+                $('#orderDetails').html(response.data);
+            });
     }
 
     function displayCustomers(customers) {
@@ -79,24 +80,25 @@
         // Clear previous order details
         $('#orderDetails').empty();
         $('#lstOrders').empty();
-        $.get(`/api/customers/${customerId}/orders`, function(orders) {
+        axios.get(`/api/customers/${customerId}/orders`)
+            .then(response => {
+                const orders = response.data;
+                let html = '<div class="mb-3">';
+                html += '<h3>Customer Orders</h3>';
+                html += '</div><div class="list-group">';
+                orders.forEach(order => {
+                    html += `
+                        <a href="#" class="list-group-item list-group-item-action" onclick="loadOrderDetails(${order.id})">
+                            Order #${order.id} - ${order.created_at}
+                        </a>
+                    `;
+                });
+                html += '</div>';
+                $('#lstOrders').html(html);
 
-            let html = '<div class="mb-3">';
-            html += '<h3>Customer Orders</h3>';
-            html += '</div><div class="list-group">';
-            orders.forEach(order => {
-                html += `
-                    <a href="#" class="list-group-item list-group-item-action" onclick="loadOrderDetails(${order.id})">
-                        Order #${order.id} - ${order.created_at}
-                    </a>
-                `;
+                // Automatically collapse the customer list after selection
+                $('#customerListCollapse').collapse('hide');
             });
-            html += '</div>';
-            $('#lstOrders').html(html);
-
-            // Automatically collapse the customer list after selection
-            $('#customerListCollapse').collapse('hide');
-        });
     }
 
     $(document).ready(function() {
@@ -106,10 +108,10 @@
             $('#lstOrders').empty();
             $('#orderDetails').empty();
 
-            $.get(`/api/customers/search/${searchTerm}`, function(customers) {
-
-                displayCustomers(customers.customers);
-            });
+            axios.get(`/api/customers/search/${searchTerm}`)
+                .then(response => {
+                    displayCustomers(response.data.customers);
+                });
         });
     });
 </script>
