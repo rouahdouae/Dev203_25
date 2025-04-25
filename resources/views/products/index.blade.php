@@ -5,6 +5,14 @@
     <div class="row mb-4">
         <div class="col d-flex justify-content-between align-items-center">
             <h2 class="h3 mb-0">Product List</h2>
+            <div class="d-flex gap-2">
+                <a class="btn btn-warning" href="{{ route('products.export') }}"><i class="fa fa-download"></i>
+                    Export</a>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                    data-bs-target="#importProductModal">
+                    <i class="fa fa-file"></i> Import
+                </button>
+            </div>
 
             <div class="d-flex gap-2">
                 <button type="button" class="btn btn-success d-flex align-items-center gap-2" data-bs-toggle="modal"
@@ -145,6 +153,7 @@
 @include('products.partials.create-modal')
 @include('products.partials.edit-modal')
 @include('products.partials.delete-modal')
+@include('products.partials.import-modal')
 
 @push('scripts')
 <script>

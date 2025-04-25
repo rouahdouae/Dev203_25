@@ -2,35 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
-use App\Models\Category;
-use App\Models\Supplier;
+use App\Models\{Product, Category, Supplier};
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\ProductRequest;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ProductExport;
+use App\Imports\ProductImport;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the products.
-     */
-    public function index(Request $request)
+    public function index(Request $request): View|array
     {
         $products = Product::with(['category', 'supplier', 'stock'])
-            ->when(request('search'), function($query, $search) {
+            ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-                 //   ->orWhere('code', 'like', "%{$search}%");
+                      ->orWhere('description', 'like', "%{$search}%");
             })
             ->paginate(10);
 
-        $categories = Category::all();
-        $suppliers = Supplier::all();
-
-        if (request()->ajax()) {
-            return response()->json([
+        if ($request->ajax()) {
+            return [
                 'products' => $products->items(),
                 'pagination' => [
                     'total' => $products->total(),
@@ -38,77 +31,57 @@ class ProductController extends Controller
                     'current_page' => $products->currentPage(),
                     'last_page' => $products->lastPage(),
                 ]
-            ]);
+            ];
         }
 
-        return view('products.index', compact('products', 'categories', 'suppliers'));
+        return view('products.index', [
+            'products' => $products,
+            'categories' => Category::all(),
+            'suppliers' => Supplier::all()
+        ]);
     }
 
-    /**
-     * Store a newly created product in storage.
-     */
     public function store(ProductRequest $request)
     {
         $validated = $request->validated();
 
-        // Handle file upload if present
         if ($request->hasFile('picture')) {
-            $picturePath = $request->file('picture')->store('products', 'public');
-            $validated['picture'] = $picturePath;
+            $validated['picture'] = $request->file('picture')->store('products', 'public');
         }
 
         $product = Product::create($validated);
 
-        if ($request->ajax()) {
-            return response()->json(['success' => true, 'product' => $product]);
-        }
-
-        return redirect()->route('products.index')
-            ->with('success', 'Product created successfully.');
+        return $request->ajax()
+            ? response()->json(['success' => true, 'product' => $product])
+            : redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
 
-    /**
-     * Display the specified product.
-     */
     public function show(Product $product)
     {
         return response()->json($product);
     }
 
-    /**
-     * Update the specified product in storage.
-     */
     public function update(ProductRequest $request, Product $product)
     {
         $validated = $request->validated();
 
-        // Handle file upload if present
         if ($request->hasFile('picture')) {
-            // Delete old picture if exists
             if ($product->picture) {
                 Storage::disk('public')->delete($product->picture);
             }
 
-            $picturePath = $request->file('picture')->store('products', 'public');
-            $validated['picture'] = $picturePath;
+            $validated['picture'] = $request->file('picture')->store('products', 'public');
         }
 
         $product->update($validated);
 
-        if ($request->ajax()) {
-            return response()->json(['success' => true, 'product' => $product]);
-        }
-
-        return redirect()->route('products.index')
-            ->with('success', 'Product updated successfully.');
+        return $request->ajax()
+            ? response()->json(['success' => true, 'product' => $product])
+            : redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
 
-    /**
-     * Remove the specified product from storage.
-     */
     public function destroy(Product $product)
     {
-        // Delete product image if exists
         if ($product->picture) {
             Storage::disk('public')->delete($product->picture);
         }
@@ -116,5 +89,17 @@ class ProductController extends Controller
         $product->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    public function export()
+    {
+        return Excel::download(new ProductExport, 'products.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        Excel::import(new ProductImport, $request->file('file'));
+
+        return back()->with('success', 'Products imported successfully.');
     }
 }

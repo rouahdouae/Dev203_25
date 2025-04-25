@@ -7,6 +7,8 @@ use App\Http\Requests\CustomerRequest;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use App\Mail\MyMailer;
+use Illuminate\Support\Facades\Mail;
 
 class CustomerController extends Controller
 {
@@ -34,7 +36,13 @@ class CustomerController extends Controller
     public function store(CustomerRequest $request): RedirectResponse
     {
         // The request is automatically validated by the CustomerRequest class
-        Customer::create($request->validated());
+        $validated = $request->validated();
+        Customer::create($validated);
+
+        // envoi de l'email
+        Mail::to($validated['email'])->send(
+            new MyMailer($validated['first_name'] . ' ' . $validated['last_name'])
+        );
 
         return redirect()->route('customers.index')
             ->with('success', 'Customer created successfully.');
@@ -84,13 +92,18 @@ class CustomerController extends Controller
      */
     public function searchTerm(Request $request, $term)
     {
+        return response()->json(
+            $this->filterCustomers($term)->get()
+        );
+    }
 
-        $customers = Customer::where('first_name', 'like', "%{$term}%")
-            ->orWhere('last_name', 'like', "%{$term}%")
-            ->orWhere('email', 'like', "%{$term}%")
-            ->orWhere('phone', 'like', "%{$term}%")
-            ->orWhere('address', 'like', "%{$term}%")
-            ->paginate(10);
+    /**
+     * Search for customers by name, email, phone or address.
+     */
+    public function search(Request $request)
+    {
+        $term = $request->input('term');
+        $customers = $this->filterCustomers($term)->paginate(10);
 
         return response()->json([
             'customers' => $customers->items(),
@@ -105,30 +118,17 @@ class CustomerController extends Controller
             ]
         ]);
     }
-  /**
-     * Search for customers by name, email, phone or address.
+
+    /**
+     * Shared search query logic.
      */
-    public function search(Request $request)
+    private function filterCustomers(string $term)
     {
-$term = $request->input('term');
-        $customers = Customer::where('first_name', 'like', "%{$term}%")
+        return Customer::query()
+            ->where('first_name', 'like', "%{$term}%")
             ->orWhere('last_name', 'like', "%{$term}%")
             ->orWhere('email', 'like', "%{$term}%")
             ->orWhere('phone', 'like', "%{$term}%")
-            ->orWhere('address', 'like', "%{$term}%")
-            ->paginate(10);
-
-        return response()->json([
-            'customers' => $customers->items(),
-            'pagination' => [
-                'total' => $customers->total(),
-                'per_page' => $customers->perPage(),
-                'current_page' => $customers->currentPage(),
-                'last_page' => $customers->lastPage(),
-                'from' => $customers->firstItem(),
-                'to' => $customers->lastItem(),
-                'links' => $customers->linkCollection()->toArray()
-            ]
-        ]);
+            ->orWhere('address', 'like', "%{$term}%");
     }
 }

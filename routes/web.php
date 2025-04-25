@@ -6,6 +6,20 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Facades\Log;
+
+
+Route::get('/changeLocale/{locale}', function (string $locale) {
+    if (in_array($locale, ['en', 'es', 'fr', 'ar'])) {
+        Log::info('Current  locale: ' . ($locale ?? 'not set'));
+
+        session()->put('locale', $locale);
+        Log::info('Current  session: ' . (session('locale') ?? 'not set'));
+
+     }
+    return redirect()->back();
+});
+
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/customers', [DashboardController::class, 'customers'])->name('customers.index');
@@ -51,3 +65,9 @@ Route::get('/api/customers/{customer}/orders', [OrderController::class, 'getCust
 Route::get('/api/orders/{order}/details', [OrderController::class, 'getOrderDetails'])->name('orders.details');
 
 
+Route::post("/saveCookie", [DashboardController::class, 'saveCookie'])->name("saveCookie");
+Route::post("/saveSession", [DashboardController::class, 'saveSession'])->name("saveSession");
+Route::post("/saveAvatar", [DashboardController::class, 'saveAvatar'])->name("saveAvatar");
+
+Route::get('products-export', [ProductController::class, 'export'])->name('products.export');
+Route::post('products-import', [ProductController::class, 'import'])->name('products.import');

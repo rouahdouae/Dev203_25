@@ -1,65 +1,66 @@
-<!-- Edit Product Modal -->
-<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+<!-- Modal d'édition -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Edit Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
+            
             <form id="editProductForm" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
-                <input type="hidden" id="editProductId" name="product_id">
+                <input type="hidden" name="product_id">
+                
                 <div class="modal-body">
+                    <!-- Champs du formulaire -->
                     <div class="mb-3">
-                        <label for="editName" class="form-label">Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="editName" name="name" required>
-                        <div class="invalid-feedback"></div>
+                        <label class="form-label">Name *</label>
+                        <input type="text" name="name" class="form-control" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="editDescription" class="form-label">Description <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="editDescription" name="description" rows="3" required></textarea>
-                        <div class="invalid-feedback"></div>
+                        <label class="form-label">Description *</label>
+                        <textarea name="description" class="form-control" rows="3" required></textarea>
                     </div>
 
                     <div class="mb-3">
-                        <label for="editPrice" class="form-label">Price <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="editPrice" name="price" step="0.01" min="0" required>
-                        <div class="invalid-feedback"></div>
+                        <label class="form-label">Price *</label>
+                        <input type="number" name="price" class="form-control" step="0.01" min="0" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="editCategoryId" class="form-label">Category <span class="text-danger">*</span></label>
-                        <select class="form-select" id="editCategoryId" name="category_id" required>
+                        <label class="form-label">Category *</label>
+                        <select name="category_id" class="form-select" required>
                             <option value="">Select Category</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
                         </select>
-                        <div class="invalid-feedback"></div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="editSupplierId" class="form-label">Supplier <span class="text-danger">*</span></label>
-                        <select class="form-select" id="editSupplierId" name="supplier_id" required>
+                        <label class="form-label">Supplier *</label>
+                        <select name="supplier_id" class="form-select" required>
                             <option value="">Select Supplier</option>
                             @foreach($suppliers as $supplier)
                                 <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                             @endforeach
                         </select>
-                        <div class="invalid-feedback"></div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="editPicture" class="form-label">Product Image</label>
-                        <input type="file" class="form-control" id="editPicture" name="picture" accept="image/*">
-                        <div class="invalid-feedback"></div>
+                        <label class="form-label">Product Image</label>
+                        <input type="file" name="picture" class="form-control" accept="image/*">
                     </div>
+                    
+                    <!-- Messages d'erreur génériques -->
+                    <div class="invalid-feedback d-none"></div>
                 </div>
+                
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Product</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>
         </div>
@@ -68,39 +69,68 @@
 
 @push('scripts')
 <script>
-$(document).ready(function() {
-    $('#editProductForm').on('submit', function(e) {
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editProductForm');
+    const modal = document.getElementById('editProductModal');
+    
+    // Gestion de la soumission
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        let form = $(this);
-        let productId = $('#editProductId').val();
-        let formData = new FormData(this);
-
-        $.ajax({
-            url: `/products/${productId}`,
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                $('#editProductModal').modal('hide');
-                window.location.reload();
-            },
-            error: function(xhr) {
-                let errors = xhr.responseJSON.errors;
-                Object.keys(errors).forEach(function(field) {
-                    let input = form.find(`[name=${field}]`);
-                    input.addClass('is-invalid');
-                    input.siblings('.invalid-feedback').text(errors[field][0]);
-                });
+        
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            });
+            
+            if (!response.ok) throw await response.json();
+            
+            modal.hide();
+            window.location.reload();
+        } catch (error) {
+            showFormErrors(error.errors);
+        }
+    });
+    
+    // Réinitialisation du modal
+    modal.addEventListener('hidden.bs.modal', () => {
+        form.reset();
+        clearErrors();
+    });
+    
+    // Fonctions utilitaires
+    function showFormErrors(errors) {
+        clearErrors();
+        
+        Object.entries(errors).forEach(([field, messages]) => {
+            const input = form.querySelector(`[name="${field}"]`);
+            if (input) {
+                input.classList.add('is-invalid');
+                const errorDiv = input.nextElementSibling || form.querySelector('.invalid-feedback');
+                errorDiv.textContent = messages[0];
+                errorDiv.classList.remove('d-none');
             }
         });
-    });
-
-    $('#editProductModal').on('hidden.bs.modal', function() {
-        let form = $('#editProductForm');
-        form.find('.is-invalid').removeClass('is-invalid');
-        form.find('.invalid-feedback').empty();
-    });
+    }
+    
+    function clearErrors() {
+        form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        form.querySelectorAll('.invalid-feedback').forEach(el => {
+            el.textContent = '';
+            el.classList.add('d-none');
+        });
+    }
+    
+    // Fonction pour charger les données du produit
+    window.loadProductData = (product) => {
+        form.action = `/products/${product.id}`;
+        form.querySelector('[name="product_id"]').value = product.id;
+        form.querySelector('[name="name"]').value = product.name;
+        form.querySelector('[name="description"]').value = product.description;
+        form.querySelector('[name="price"]').value = product.price;
+        form.querySelector('[name="category_id"]').value = product.category_id;
+        form.querySelector('[name="supplier_id"]').value = product.supplier_id;
+    };
 });
 </script>
 @endpush
